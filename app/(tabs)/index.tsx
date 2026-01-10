@@ -1,15 +1,24 @@
 import { createHomeStyles } from "@/assets/styles/home.style";
+import EmptyState from "@/components/EmptyState";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import TodoInput from "@/components/TodoInput";
+import TodoItem from "@/components/TodoItem";
+import { api } from "@/convex/_generated/api";
 import { useTheme } from "@/hooks/useTheme";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
-import { Link } from "expo-router";
-import { StatusBar, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Header from "../../components/Header";
 
 export default function Index() {
   const { toggleDarkMode, colors } = useTheme();
   const styles = createHomeStyles(colors);
-
+  const todos = useQuery(api.todos.todos);
+  const isLoading = todos === undefined;
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
   return (
     <LinearGradient
       colors={colors.gradients.background}
@@ -17,44 +26,19 @@ export default function Index() {
     >
       <StatusBar barStyle={colors.statusBarStyle} />
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
-          <View style={styles.titleContainer}>
-            {/* icon */}
-            <View
-              style={[
-                styles.iconContainer,
-                { backgroundColor: "blue" },
-                { borderRadius: 8 },
-              ]}
-            >
-              <FontAwesome name="flash" size={24} color={colors.text} />
-            </View>
-            {/* title */}
-            <View style={styles.titleTextContainer}>
-              <Text style={styles.title}>Today&apos;s Tasks 👀</Text>
-              <Text style={styles.subtitle}>2 of 4 completed</Text>
-            </View>
-          </View>
-          {/* progress */}
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBarContainer}>
-              <View style={styles.progressBar}>
-                <View
-                  style={[
-                    styles.progressFill,
-                    { backgroundColor: colors.success },
-                    { width: "50%" }, // will be dynamic
-                  ]}
-                />
-              </View>
-              <Text style={styles.progressText}>2 of 4</Text>
-            </View>
-          </View>
-        </View>
-        <Link href="/settings">Visit settings...</Link>
-        <TouchableOpacity onPress={toggleDarkMode}>
-          <Text>toggle to dark mode</Text>
-        </TouchableOpacity>
+        {/* header */}
+        <Header />
+        {/* todo input */}
+        <TodoInput />
+        {/* todo list */}
+        <FlatList
+          data={todos}
+          renderItem={({ item }) => <TodoItem item={item} />}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={styles.todoListContent}
+          ListEmptyComponent={<EmptyState />}
+          showsVerticalScrollIndicator={false} // will hide the scrollbar
+        />
       </SafeAreaView>
     </LinearGradient>
   );

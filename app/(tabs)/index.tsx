@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../../components/Header";
 
 export default function Index() {
-  const { toggleDarkMode, colors } = useTheme();
+  const { colors } = useTheme();
   const styles = createHomeStyles(colors);
   const todos = useQuery(api.todos.todos);
   const isLoading = todos === undefined;

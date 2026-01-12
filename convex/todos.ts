@@ -55,3 +55,16 @@ export const updateTodo = mutation({
     });
   },
 });
+
+export const clearAllTodos = mutation({
+  handler: async (ctx) => {
+    const todos = await ctx.db.query("todos").collect();
+
+    // Delete all todos
+    for (const todo of todos) {
+      await ctx.db.delete(todo._id);
+    }
+
+    return { deletedCount: todos.length };
+  },
+});
